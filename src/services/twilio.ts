@@ -1,7 +1,8 @@
 import type { Bindings } from '../types'
 
 /**
- * Initiate an outbound call via Twilio
+ * Initiate an outbound call via Twilio with Media Streams
+ * Enables real-time bidirectional audio streaming for conversational AI
  */
 export async function initiateCall(
   env: Bindings,
@@ -10,6 +11,7 @@ export async function initiateCall(
     from: string // Caller phone number (from 11Labs)
     webhookUrl: string // URL for call status updates
     conversationPrompt: string // AI prompt for the conversation
+    mediaStreamUrl?: string // WebSocket URL for Media Streams
   }
 ): Promise<{ call_sid: string; status: string } | null> {
   const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN } = env
@@ -28,14 +30,11 @@ export async function initiateCall(
     // Twilio API endpoint
     const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Calls.json`
     
-    // Create TwiML for the call
-    // In production, this would connect to your 11Labs voice AI
-    // For now, we'll use a simple webhook approach
-    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Say voice="alice">Connecting to AI assistant...</Say>
-  <Pause length="1"/>
-</Response>`
+    // Create TwiML with Media Streams for real-time conversational AI
+    // This connects the call to our WebSocket endpoint for bidirectional audio
+    const twiml = params.mediaStreamUrl 
+      ? createMediaStreamTwiML(params.mediaStreamUrl, params.conversationPrompt)
+      : createBasicTwiML()
     
     // Prepare form data for Twilio API
     const formData = new URLSearchParams()
@@ -203,4 +202,46 @@ export function formatPhoneNumber(phoneNumber: string): string {
   
   // Otherwise, just add + if not present
   return phoneNumber.startsWith('+') ? phoneNumber : `+${digits}`
+}
+
+/**
+ * Create TwiML with Media Streams for conversational AI
+ * This enables real-time bidirectional audio streaming
+ */
+function createMediaStreamTwiML(websocketUrl: string, conversationContext: string): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Connect>
+    <Stream url="${websocketUrl}">
+      <Parameter name="conversationContext" value="${escapeXml(conversationContext)}" />
+    </Stream>
+  </Connect>
+</Response>`
+}
+
+/**
+ * Create basic TwiML without Media Streams (fallback)
+ */
+function createBasicTwiML(): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say voice="alice">Connecting to AI assistant...</Say>
+  <Pause length="1"/>
+</Response>`
+}
+
+/**
+ * Escape XML special characters
+ */
+function escapeXml(unsafe: string): string {
+  return unsafe.replace(/[<>&'"]/g, (c) => {
+    switch (c) {
+      case '<': return '&lt;'
+      case '>': return '&gt;'
+      case '&': return '&amp;'
+      case "'": return '&apos;'
+      case '"': return '&quot;'
+      default: return c
+    }
+  })
 }
