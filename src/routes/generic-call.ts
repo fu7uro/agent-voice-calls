@@ -40,19 +40,26 @@ app.post('/api/call/make-call', async (c) => {
     
     console.log(`Making ${request.call_purpose} call to ${request.recipient.name} (${recipientPhone})`)
     
-    // Generate conversation prompt
+    // Generate conversation prompt for the AI
     const conversationPrompt = generateGenericCallPrompt(request)
     
-    // Get base URL for webhooks
+    // Get base URL for webhooks and WebSocket
     const baseUrl = new URL(c.req.url).origin
     const webhookUrl = `${baseUrl}/webhook/call-status`
     
-    // Initiate the call
+    // Build WebSocket URL for Media Streams (ws:// or wss://)
+    const wsProtocol = baseUrl.startsWith('https') ? 'wss' : 'ws'
+    const wsUrl = `${wsProtocol}://${new URL(baseUrl).host}/ws/media-stream?context=${encodeURIComponent(conversationPrompt)}`
+    
+    console.log('[Generic Call] WebSocket URL:', wsUrl)
+    
+    // Initiate the call with Media Streams for conversational AI
     const callResult = await initiateCall(c.env, {
       to: recipientPhone,
       from: callerPhone,
       webhookUrl: webhookUrl,
-      conversationPrompt: conversationPrompt
+      conversationPrompt: conversationPrompt,
+      mediaStreamUrl: wsUrl // Enable real-time conversational AI!
     })
     
     if (!callResult) {

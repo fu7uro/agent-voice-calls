@@ -77,19 +77,26 @@ app.post('/api/call/book-restaurant', async (c) => {
     
     console.log(`Booking reservation at ${request.restaurant_name} (${restaurantPhone})`)
     
-    // Generate conversation prompt
+    // Generate conversation prompt for the AI
     const conversationPrompt = generateRestaurantBookingPrompt(request)
     
-    // Get base URL for webhooks
+    // Get base URL for webhooks and WebSocket
     const baseUrl = new URL(c.req.url).origin
     const webhookUrl = `${baseUrl}/webhook/call-status`
     
-    // Initiate the call
+    // Build WebSocket URL for Media Streams (ws:// or wss://)
+    const wsProtocol = baseUrl.startsWith('https') ? 'wss' : 'ws'
+    const wsUrl = `${wsProtocol}://${new URL(baseUrl).host}/ws/media-stream?context=${encodeURIComponent(conversationPrompt)}`
+    
+    console.log('[Restaurant] WebSocket URL:', wsUrl)
+    
+    // Initiate the call with Media Streams for conversational AI
     const callResult = await initiateCall(c.env, {
       to: restaurantPhone,
       from: callerPhone,
       webhookUrl: webhookUrl,
-      conversationPrompt: conversationPrompt
+      conversationPrompt: conversationPrompt,
+      mediaStreamUrl: wsUrl // Enable real-time conversational AI!
     })
     
     if (!callResult) {

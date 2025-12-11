@@ -7,6 +7,7 @@ import type { Bindings } from './types'
 import restaurantRoutes from './routes/restaurant'
 import genericCallRoutes from './routes/generic-call'
 import callStatusRoutes from './routes/call-status'
+import websocketRoutes from './routes/websocket'
 
 // Create main Hono app
 const app = new Hono<{ Bindings: Bindings }>()
@@ -118,6 +119,31 @@ app.get('/api/docs', (c) => {
         description: 'Twilio webhook for recording status (internal use)',
         method: 'POST'
       }
+    },
+    websocket: {
+      mediaStream: {
+        path: '/ws/media-stream',
+        description: 'WebSocket endpoint for Twilio Media Streams (real-time audio)',
+        protocol: 'WebSocket',
+        features: [
+          'Real-time bidirectional audio streaming',
+          '11Labs Conversational AI integration',
+          'Ivanna voice with hardcoded settings',
+          'Automatic μ-law ↔ PCM16 conversion',
+          'Live transcript capture',
+          '<500ms latency target'
+        ]
+      },
+      health: {
+        path: '/ws/health',
+        description: 'WebSocket service health check',
+        method: 'GET'
+      },
+      stats: {
+        path: '/ws/stats',
+        description: 'Get active WebSocket connection statistics',
+        method: 'GET'
+      }
     }
   })
 })
@@ -126,6 +152,7 @@ app.get('/api/docs', (c) => {
 app.route('/', restaurantRoutes)
 app.route('/', genericCallRoutes)
 app.route('/', callStatusRoutes)
+app.route('/', websocketRoutes)
 
 // Root endpoint
 app.get('/', (c) => {
