@@ -137,3 +137,43 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Cloudflare Workers & Wrangler
+.wrangler/
+.mf/
+wrangler.toml.backup
+
+# Environment variables & Secrets (CRITICAL)
+.dev.vars
+.env.local
+.env.production
+
+# PM2
+.pm2/
+pm2.log
+
+# Call recordings & sensitive data
+recordings/
+transcripts/*.json
+
+# Database files (local D1 SQLite)
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.tar.gz
+*.zip
+*.backup
+*.bak
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+Thumbs.db
+
+# Build output (will be generated)
+dist/

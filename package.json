@@ -1,0 +1,43 @@
+{
+  "name": "agent-voice-calls",
+  "version": "1.0.0",
+  "description": "AI agent outbound calling platform for restaurant bookings and generic voice calls via Twilio",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:sandbox": "wrangler pages dev dist --ip 0.0.0.0 --port 3000",
+    "build": "vite build",
+    "preview": "wrangler pages dev dist",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name agent-voice-calls",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "db:migrate:local": "wrangler d1 migrations apply agent-voice-calls-db --local",
+    "db:migrate:prod": "wrangler d1 migrations apply agent-voice-calls-db",
+    "db:console:local": "wrangler d1 execute agent-voice-calls-db --local",
+    "db:console:prod": "wrangler d1 execute agent-voice-calls-db",
+    "clean-port": "fuser -k 3000/tcp 2>/dev/null || true",
+    "test": "curl http://localhost:3000/api/health",
+    "git:commit": "git add . && git commit -m",
+    "git:push": "git push origin main"
+  },
+  "dependencies": {
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250705.0",
+    "@hono/vite-cloudflare-pages": "^0.4.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
+    "wrangler": "^3.95.0"
+  },
+  "keywords": [
+    "ai-agent",
+    "voice-calling",
+    "twilio",
+    "restaurant-booking",
+    "cloudflare-workers",
+    "hono"
+  ],
+  "author": "Futuro Corporation",
+  "license": "UNLICENSED",
+  "private": true
+}

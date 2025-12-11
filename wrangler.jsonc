@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "agent-voice-calls",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "pages_build_output_dir": "./dist",
+
+  // D1 Database for call logs and analytics
+  // IMPORTANT: Create database first with: npx wrangler d1 create agent-voice-calls-db
+  // Then replace "your-database-id" with the actual ID
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "agent-voice-calls-db",
+      "database_id": "your-database-id"
+    }
+  ],
+
+  // Environment variables (non-secret)
+  // Secrets should be added via: npx wrangler pages secret put KEY_NAME --project-name agent-voice-calls
+  "vars": {
+    "ENVIRONMENT": "production"
+  }
+}
